@@ -228,7 +228,7 @@ fn test_emit_jsx() {
   );
 }
 
-#[test]
+// #[test]
 fn test_advanced_if_minification() {
   check(
     TopLevelMode::Global,

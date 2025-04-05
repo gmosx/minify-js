@@ -1,7 +1,7 @@
-use super::advanced_if::analyse_if_branch;
-use super::advanced_if::process_if_branch;
+// use super::advanced_if::analyse_if_branch;
+// use super::advanced_if::process_if_branch;
 use super::ctx::Ctx;
-use super::ctx::MinifyScope;
+// use super::ctx::MinifyScope;
 use super::ctx::MinifySymbol;
 use parse_js::ast::new_node;
 use parse_js::ast::NodeData;
@@ -367,86 +367,86 @@ impl<'a, 'b> Visitor<'a> for Pass1<'a, 'b> {
         }
         body.truncate(w);
       }
-      Syntax::IfStmt {
-        test,
-        consequent,
-        alternate,
-      } => {
-        // Note that we cannot process unless both branches can be processed, otherwise we'll be left with one branch mutated.
-        let cons_ok = analyse_if_branch(&consequent.stx);
-        let alt_ok = alternate.as_ref().map(|alt| analyse_if_branch(&alt.stx));
+      //   Syntax::IfStmt {
+      //     test,
+      //     consequent,
+      //     alternate,
+      //   } => {
+      //     // Note that we cannot process unless both branches can be processed, otherwise we'll be left with one branch mutated.
+      //     let cons_ok = analyse_if_branch(&consequent.stx);
+      //     let alt_ok = alternate.as_ref().map(|alt| analyse_if_branch(&alt.stx));
 
-        match (cons_ok, alt_ok) {
-          (true, None) => {
-            let closure_scope = scope.find_self_or_ancestor(|t| t.is_closure()).unwrap();
-            let cons_expr = process_if_branch(self.ctx.session, scope, consequent);
-            let min_scope = self
-              .ctx
-              .scopes
-              .entry(closure_scope)
-              .or_insert_with(|| MinifyScope::new(self.ctx.session));
-            min_scope
-              .hoisted_vars
-              .extend_from_slice(&cons_expr.hoisted_vars);
-            if cons_expr.returns {
-              consequent.stx = Syntax::ReturnStmt {
-                value: Some(cons_expr.expression),
-              };
-            } else {
-              let right = cons_expr.expression;
-              let test = test.take(self.ctx.session);
-              node.stx = Syntax::ExpressionStmt {
-                expression: new_node(
-                  self.ctx.session,
-                  scope,
-                  loc,
-                  Syntax::BinaryExpr {
-                    parenthesised: false,
-                    operator: OperatorName::LogicalAnd,
-                    left: test,
-                    right,
-                  },
-                ),
-              };
-            }
-          }
-          (true, Some(true)) => {
-            let closure_scope = scope.find_self_or_ancestor(|t| t.is_closure()).unwrap();
-            let cons_expr = process_if_branch(self.ctx.session, scope, consequent);
-            let alt_expr = process_if_branch(self.ctx.session, scope, alternate.as_mut().unwrap());
-            let min_scope = self
-              .ctx
-              .scopes
-              .entry(closure_scope)
-              .or_insert_with(|| MinifyScope::new(self.ctx.session));
-            min_scope
-              .hoisted_vars
-              .extend_from_slice(&cons_expr.hoisted_vars);
-            min_scope
-              .hoisted_vars
-              .extend_from_slice(&alt_expr.hoisted_vars);
-            // Due to normalisation, it's not possible for an `if-else` to return in either branch, because one branch would've been unwrapped.
-            assert!(cons_expr.returns && alt_expr.returns);
-            let test = test.take(self.ctx.session);
-            let consequent = cons_expr.expression;
-            let alternate = alt_expr.expression;
-            node.stx = Syntax::ExpressionStmt {
-              expression: new_node(
-                self.ctx.session,
-                scope,
-                loc,
-                Syntax::ConditionalExpr {
-                  parenthesised: false,
-                  test,
-                  consequent,
-                  alternate,
-                },
-              ),
-            };
-          }
-          _ => {}
-        };
-      }
+      //     match (cons_ok, alt_ok) {
+      //       (true, None) => {
+      //         let closure_scope = scope.find_self_or_ancestor(|t| t.is_closure()).unwrap();
+      //         let cons_expr = process_if_branch(self.ctx.session, scope, consequent);
+      //         let min_scope = self
+      //           .ctx
+      //           .scopes
+      //           .entry(closure_scope)
+      //           .or_insert_with(|| MinifyScope::new(self.ctx.session));
+      //         min_scope
+      //           .hoisted_vars
+      //           .extend_from_slice(&cons_expr.hoisted_vars);
+      //         if cons_expr.returns {
+      //           consequent.stx = Syntax::ReturnStmt {
+      //             value: Some(cons_expr.expression),
+      //           };
+      //         } else {
+      //           let right = cons_expr.expression;
+      //           let test = test.take(self.ctx.session);
+      //           node.stx = Syntax::ExpressionStmt {
+      //             expression: new_node(
+      //               self.ctx.session,
+      //               scope,
+      //               loc,
+      //               Syntax::BinaryExpr {
+      //                 parenthesised: false,
+      //                 operator: OperatorName::LogicalAnd,
+      //                 left: test,
+      //                 right,
+      //               },
+      //             ),
+      //           };
+      //         }
+      //       }
+      //       (true, Some(true)) => {
+      //         let closure_scope = scope.find_self_or_ancestor(|t| t.is_closure()).unwrap();
+      //         let cons_expr = process_if_branch(self.ctx.session, scope, consequent);
+      //         let alt_expr = process_if_branch(self.ctx.session, scope, alternate.as_mut().unwrap());
+      //         let min_scope = self
+      //           .ctx
+      //           .scopes
+      //           .entry(closure_scope)
+      //           .or_insert_with(|| MinifyScope::new(self.ctx.session));
+      //         min_scope
+      //           .hoisted_vars
+      //           .extend_from_slice(&cons_expr.hoisted_vars);
+      //         min_scope
+      //           .hoisted_vars
+      //           .extend_from_slice(&alt_expr.hoisted_vars);
+      //         // Due to normalisation, it's not possible for an `if-else` to return in either branch, because one branch would've been unwrapped.
+      //         assert!(cons_expr.returns && alt_expr.returns);
+      //         let test = test.take(self.ctx.session);
+      //         let consequent = cons_expr.expression;
+      //         let alternate = alt_expr.expression;
+      //         node.stx = Syntax::ExpressionStmt {
+      //           expression: new_node(
+      //             self.ctx.session,
+      //             scope,
+      //             loc,
+      //             Syntax::ConditionalExpr {
+      //               parenthesised: false,
+      //               test,
+      //               consequent,
+      //               alternate,
+      //             },
+      //           ),
+      //         };
+      //       }
+      //       _ => {}
+      //     };
+      //   }
       _ => {}
     };
   }

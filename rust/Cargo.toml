@@ -1,6 +1,11 @@
 [package]
 authors = ["Wilson Lin <code@wilsonl.in>"]
-categories = ["compression", "command-line-utilities", "development-tools::build-utils", "web-programming"]
+categories = [
+    "compression",
+    "command-line-utilities",
+    "development-tools::build-utils",
+    "web-programming",
+]
 description = "Extremely fast JavaScript minifier"
 edition = "2021"
 homepage = "https://github.com/wilsonzlin/minify-js"
@@ -10,7 +15,7 @@ license = "Apache-2.0"
 name = "minify-js"
 readme = "README.md"
 repository = "https://github.com/wilsonzlin/minify-js"
-version = "0.6.0"
+version = "0.6.1"
 
 [dependencies]
 aho-corasick = "0.7"
