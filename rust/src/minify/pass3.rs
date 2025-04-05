@@ -9,7 +9,6 @@ use parse_js::ast::ObjectMemberType;
 use parse_js::ast::Syntax;
 use parse_js::ast::VarDeclMode;
 use parse_js::ast::VariableDeclarator;
-use parse_js::flag::Flags;
 use parse_js::session::Session;
 use parse_js::session::SessionHashMap;
 use parse_js::source::SourceRange;
@@ -89,22 +88,30 @@ impl<'a, 'b> Visitor<'a> for Pass3<'a, 'b> {
             if !min_scope.hoisted_vars.is_empty() {
               body.insert(
                 0,
-                new_node(self.session, scope, loc, Syntax::VarDecl {
-                  export: false,
-                  mode: VarDeclMode::Var,
-                  declarators: {
-                    let mut decls = self.session.new_vec();
-                    for v in min_scope.hoisted_vars.iter() {
-                      decls.push(VariableDeclarator {
-                        pattern: new_node(self.session, scope, loc, Syntax::IdentifierPattern {
-                          name: *v,
-                        }),
-                        initializer: None,
-                      })
-                    }
-                    decls
+                new_node(
+                  self.session,
+                  scope,
+                  loc,
+                  Syntax::VarDecl {
+                    export: false,
+                    mode: VarDeclMode::Var,
+                    declarators: {
+                      let mut decls = self.session.new_vec();
+                      for v in min_scope.hoisted_vars.iter() {
+                        decls.push(VariableDeclarator {
+                          pattern: new_node(
+                            self.session,
+                            scope,
+                            loc,
+                            Syntax::IdentifierPattern { name: *v },
+                          ),
+                          initializer: None,
+                        })
+                      }
+                      decls
+                    },
                   },
-                }),
+                ),
               );
             }
             for fn_decl in min_scope.hoisted_functions.values_mut() {

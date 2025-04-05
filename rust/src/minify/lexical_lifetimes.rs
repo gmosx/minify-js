@@ -121,7 +121,7 @@ impl<'a, 'b> Visitor<'a> for LexicalLifetimesPass<'a, 'b> {
             .update_lifetime(lifetime);
         }
       }
-      Syntax::IdentifierPattern { name } => {
+      Syntax::IdentifierPattern { name: _ } => {
         // TODO
       }
       Syntax::IfStmt {

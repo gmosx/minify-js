@@ -45,10 +45,10 @@ pub fn analyse_if_branch<'a>(stx: &Syntax<'a>) -> bool {
           // We can make `var` declarations into expressions by hoisting the declaration part and leaving behind an assignment expression (if an initialiser exists).
           // TODO Support non-identifier patterns, although they may not be worth minifying if we have to hoist and therefore duplicate the variable names.
           VarDeclMode::Var => {
-            if declarators.iter().any(|d| match d.pattern.stx {
-              Syntax::IdentifierPattern { .. } => false,
-              _ => true,
-            }) {
+            if declarators
+              .iter()
+              .any(|d| !matches!(d.pattern.stx, Syntax::IdentifierPattern { .. }))
+            {
               return false;
             }
           }
@@ -102,9 +102,14 @@ fn process_if_branch_block<'a, 'b>(
         returns = true;
         expressions.push(match value {
           Some(value) => value.take(session),
-          None => new_node(session, scope, loc, Syntax::IdentifierExpr {
-            name: SourceRange::from_slice(b"undefined"),
-          }),
+          None => new_node(
+            session,
+            scope,
+            loc,
+            Syntax::IdentifierExpr {
+              name: SourceRange::from_slice(b"undefined"),
+            },
+          ),
         });
       }
       Syntax::VarDecl {
@@ -161,12 +166,17 @@ fn process_if_branch_block<'a, 'b>(
         assert!(remaining.returns);
         hoisted_vars.append(&mut remaining.hoisted_vars);
         let alternate = remaining.expression;
-        expressions.push(new_node(session, scope, loc, Syntax::ConditionalExpr {
-          parenthesised: false,
-          test,
-          consequent,
-          alternate,
-        }));
+        expressions.push(new_node(
+          session,
+          scope,
+          loc,
+          Syntax::ConditionalExpr {
+            parenthesised: false,
+            test,
+            consequent,
+            alternate,
+          },
+        ));
         break;
       }
       _ => unreachable!(),
@@ -178,12 +188,17 @@ fn process_if_branch_block<'a, 'b>(
     expression: expressions
       .into_iter()
       .reduce(|left, right| {
-        new_node(session, scope, left.loc + right.loc, Syntax::BinaryExpr {
-          parenthesised: false,
-          operator: OperatorName::Comma,
-          left,
-          right,
-        })
+        new_node(
+          session,
+          scope,
+          left.loc + right.loc,
+          Syntax::BinaryExpr {
+            parenthesised: false,
+            operator: OperatorName::Comma,
+            left,
+            right,
+          },
+        )
       })
       .unwrap(),
     hoisted_vars,
@@ -191,10 +206,10 @@ fn process_if_branch_block<'a, 'b>(
   }
 }
 
-pub fn process_if_branch<'a, 'b>(
+pub fn process_if_branch<'a>(
   session: &'a Session,
   scope: Scope<'a>,
-  branch: &'b mut NodeData<'a>,
+  branch: &mut NodeData<'a>,
 ) -> ProcessedIfBranch<'a> {
   let Syntax::BlockStmt { body } = &mut branch.stx else {
     // We should have already normalised all `if` branches into a block if they were single statements, so this should not be possible.

@@ -6,7 +6,6 @@ use super::ctx::MinifySymbol;
 use parse_js::ast::new_node;
 use parse_js::ast::NodeData;
 use parse_js::ast::Syntax;
-use parse_js::operator::Operator;
 use parse_js::operator::OperatorName;
 use parse_js::session::Session;
 use parse_js::visit::JourneyControls;
@@ -59,13 +58,18 @@ fn maybe_ensure_if_statement_consequent_and_alternate_are_wrapped<'a, 'b>(
       Syntax::BlockStmt { .. } => {}
       _ => {
         let inner = branch.take(session);
-        let wrapped = new_node(session, inner.scope, inner.loc, Syntax::BlockStmt {
-          body: {
-            let mut body = session.new_vec();
-            body.push(inner);
-            body
+        let wrapped = new_node(
+          session,
+          inner.scope,
+          inner.loc,
+          Syntax::BlockStmt {
+            body: {
+              let mut body = session.new_vec();
+              body.push(inner);
+              body
+            },
           },
-        });
+        );
         // Update the original node's consequent/alternate to point to the new block we've just created.
         *branch = wrapped;
       }
@@ -107,7 +111,6 @@ fn maybe_combine_string_literals<'a, 'b>(ctx: &mut Ctx<'a, 'b>, n: &mut NodeData
 
 #[cfg(test)]
 mod tests {
-  use super::Pass1;
   use crate::emit;
   use crate::minify::ctx::Ctx;
   use crate::minify::ctx::MinifyScope;
@@ -115,7 +118,6 @@ mod tests {
   use crate::minify::pass1::maybe_combine_string_literals;
   use crate::minify::pass1::maybe_ensure_if_statement_consequent_and_alternate_are_wrapped;
   use parse_js::ast::NodeData;
-  use parse_js::ast::Syntax;
   use parse_js::parse::toplevel::TopLevelMode;
   use parse_js::session::Session;
   use parse_js::symbol::Scope;
@@ -394,12 +396,17 @@ impl<'a, 'b> Visitor<'a> for Pass1<'a, 'b> {
               let right = cons_expr.expression;
               let test = test.take(self.ctx.session);
               node.stx = Syntax::ExpressionStmt {
-                expression: new_node(self.ctx.session, scope, loc, Syntax::BinaryExpr {
-                  parenthesised: false,
-                  operator: OperatorName::LogicalAnd,
-                  left: test,
-                  right,
-                }),
+                expression: new_node(
+                  self.ctx.session,
+                  scope,
+                  loc,
+                  Syntax::BinaryExpr {
+                    parenthesised: false,
+                    operator: OperatorName::LogicalAnd,
+                    left: test,
+                    right,
+                  },
+                ),
               };
             }
           }
@@ -424,12 +431,17 @@ impl<'a, 'b> Visitor<'a> for Pass1<'a, 'b> {
             let consequent = cons_expr.expression;
             let alternate = alt_expr.expression;
             node.stx = Syntax::ExpressionStmt {
-              expression: new_node(self.ctx.session, scope, loc, Syntax::ConditionalExpr {
-                parenthesised: false,
-                test,
-                consequent,
-                alternate,
-              }),
+              expression: new_node(
+                self.ctx.session,
+                scope,
+                loc,
+                Syntax::ConditionalExpr {
+                  parenthesised: false,
+                  test,
+                  consequent,
+                  alternate,
+                },
+              ),
             };
           }
           _ => {}
