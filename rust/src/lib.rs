@@ -16,7 +16,7 @@ pub use parse_js::session::Session;
 ///
 /// * `node` - The root node from the parsed AST.
 /// * `output` - Destination to write output JavaScript code.
-pub fn emit<'a>(node: Node<'a>, output: &mut Vec<u8>) -> () {
+pub fn emit(node: Node<'_>, output: &mut Vec<u8>) {
   emit_js(output, node);
 }
 

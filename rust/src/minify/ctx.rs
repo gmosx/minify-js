@@ -8,8 +8,6 @@ use parse_js::source::SourceRange;
 use parse_js::symbol::Identifier;
 use parse_js::symbol::Scope;
 use parse_js::symbol::Symbol;
-use std::cmp::max;
-use std::cmp::min;
 
 // Our additional state that's associated with each Symbol.
 pub struct MinifySymbol<'a> {
@@ -74,7 +72,7 @@ pub struct Ctx<'a, 'b> {
   pub scopes: &'b mut SessionHashMap<'a, Scope<'a>, MinifyScope<'a>>,
 }
 
-impl<'a, 'b> Ctx<'a, 'b> {
+impl<'a> Ctx<'a, '_> {
   // See [notes/Name minification.md] for the algorithm in more detail.
   pub fn track_variable_usage(&mut self, scope: Scope<'a>, name: Identifier<'a>) {
     let mut cur = Some(scope);

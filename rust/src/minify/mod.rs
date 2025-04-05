@@ -23,7 +23,7 @@ use parse_js::symbol::Scope;
 use parse_js::symbol::Symbol;
 use parse_js::visit::Visitor;
 
-pub fn minify_js<'a>(session: &'a Session, top_level_node: &mut NodeData<'a>) -> () {
+pub fn minify_js<'a>(session: &'a Session, top_level_node: &mut NodeData<'a>) {
   let top_level_scope = top_level_node.scope;
 
   // Our custom data/state associated with a Symbol.
@@ -65,7 +65,7 @@ pub fn minify_js<'a>(session: &'a Session, top_level_node: &mut NodeData<'a>) ->
   for e in export_bindings.iter() {
     let target_symbol = top_level_scope
       .find_symbol(e.target)
-      .expect(format!("failed to find top-level export `{:?}`", e.target).as_str());
+      .unwrap_or_else(|| panic!("failed to find top-level export `{:?}`", e.target));
     export_names.push(ExportName {
       target: symbols[&target_symbol].minified_name.unwrap(),
       alias: new_node(
