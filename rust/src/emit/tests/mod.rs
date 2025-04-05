@@ -228,7 +228,7 @@ fn test_emit_jsx() {
   );
 }
 
-// #[test]
+#[test]
 fn test_advanced_if_minification() {
   check(
     TopLevelMode::Global,
@@ -299,5 +299,47 @@ fn test_advanced_if_minification() {
       }
     "#,
     r#"var foo=(a=>{var d,c;if(!a)return d=3,d;var b=1;if(cond)return c=2,c;return b})"#,
+  );
+}
+
+#[test]
+fn test_advanced_if_minification_bug() {
+  check(
+    TopLevelMode::Global,
+    r#"
+        (() => {
+            const SWITCH_SELECTOR = ".theme-switch";
+            const THEME_KEY = "theme";
+
+            const switchEl = /** @type {HTMLElement} */ (document.querySelector(SWITCH_SELECTOR));
+
+            function setTheme(theme = "light") {
+                localStorage.setItem(THEME_KEY, theme);
+
+                const mainEl = /** @type {HTMLElement} */ (document.querySelector("body"));
+
+                if (theme == "dark") {
+                    mainEl.classList.add("dark");
+                } else {
+                    // #todo convert this into a helper?
+                    mainEl.classList.remove("dark");
+                    if (!mainEl.classList.length) {
+                        mainEl.removeAttribute("class");
+                    }
+                }
+
+                switchEl.dataset.theme = theme;
+                const targetTheme = theme == "light" ? "dark" : "light";
+                switchEl.textContent = `{targetTheme}_mode`;
+            }
+
+            setTheme(localStorage.getItem(THEME_KEY) ?? "light");
+
+            switchEl.addEventListener("click", () => {
+                setTheme(switchEl.dataset.theme == "light" ? "dark" : "light");
+            });
+        })();
+    "#,
+    r#"(()=>{var d=((a=`light`)=>{localStorage.setItem(b,a);const d=document.querySelector(`body`);a==`dark`?d.classList.add(`dark`):(d.classList.remove(`dark`),!d.classList.length&&d.removeAttribute(`class`));c.dataset.theme=a;const e=a==`light`?`dark`:`light`;c.textContent=`{targetTheme}_mode`});const a=`.theme-switch`;const b=`theme`;const c=document.querySelector(a);d(localStorage.getItem(b)??`light`);c.addEventListener(`click`,()=>{d(c.dataset.theme==`light`?`dark`:`light`)})})()"#,
   );
 }
