@@ -31,6 +31,7 @@ impl<'a> LexicalLifetime<'a> {
     self.0.push(0);
   }
 
+  #[expect(dead_code)]
   pub fn is_sibling_of(&self, other: &Self) -> bool {
     let lvl = self.0.len();
     lvl == other.0.len() && (lvl == 1 || self.0[lvl - 2] == other.0[lvl - 2])
@@ -40,10 +41,12 @@ impl<'a> LexicalLifetime<'a> {
 pub struct LexicalLifetimesPass<'a, 'b> {
   pub ctx: Ctx<'a, 'b>,
   pub stack: LexicalLifetime<'a>,
+  #[expect(dead_code)]
   pub in_loop: bool,
 }
 
 impl<'a, 'b> LexicalLifetimesPass<'a, 'b> {
+  #[expect(dead_code)]
   pub fn new(ctx: Ctx<'a, 'b>) -> Self {
     let stack = LexicalLifetime::new_zero(ctx.session);
     Self {
@@ -144,13 +147,13 @@ impl<'a, 'b> Visitor<'a> for LexicalLifetimesPass<'a, 'b> {
       } => {
         self.visit_conditional(test, consequent, Some(alternate), ctl);
       }
-      Syntax::ForStmt { header, body } => {
+      Syntax::ForStmt { .. } => {
         // TODO
       }
-      Syntax::WhileStmt { condition, body } => {
+      Syntax::WhileStmt { .. } => {
         // TODO
       }
-      Syntax::DoWhileStmt { condition, body } => {
+      Syntax::DoWhileStmt { .. } => {
         // TODO
       }
       _ => {}

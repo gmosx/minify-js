@@ -3,9 +3,9 @@ use super::advanced_if::process_if_branch;
 use super::ctx::Ctx;
 use super::ctx::MinifyScope;
 use super::ctx::MinifySymbol;
-use parse_js::ast::new_node;
 use parse_js::ast::NodeData;
 use parse_js::ast::Syntax;
+use parse_js::ast::new_node;
 use parse_js::operator::OperatorName;
 use parse_js::session::Session;
 use parse_js::visit::JourneyControls;
@@ -81,6 +81,7 @@ fn maybe_ensure_if_statement_consequent_and_alternate_are_wrapped<'a, 'b>(
   }
 }
 
+#[expect(dead_code)]
 #[inline(always)]
 fn maybe_combine_string_literals<'a, 'b>(ctx: &mut Ctx<'a, 'b>, n: &mut NodeData<'a>) {
   let Syntax::BinaryExpr {
